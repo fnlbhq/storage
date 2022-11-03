@@ -29,9 +29,9 @@ func Zip(files map[string][]byte) ([]byte, error) {
 
 // UnZip is a convenience function that takes a zipfile, unzips it and returns
 // a map of the contents' filenames and contents as a byte slice
-func UnZip(file []byte) (map[string][]byte, error) {
+func UnZip(data []byte) (map[string][]byte, error) {
 	result := make(map[string][]byte)
-	zipReader, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
+	zipReader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return nil, err
 	}
