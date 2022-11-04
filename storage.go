@@ -7,6 +7,11 @@ type Credentials struct {
 	Region   string // https://github.com/aws/aws-sdk-go/issues/2232
 }
 
+type Provider interface {
+	GetBucket(name string) (Bucket, error)
+	DeleteBucket(name string) error
+}
+
 type Bucket interface {
 	Name() string
 	Keys() ([]string, error)
@@ -15,6 +20,7 @@ type Bucket interface {
 	Delete(key string) error
 	Move(originKey, destinationKey string) error
 	DownloadURL(key string) (string, error)
+	DefaultACL() string
 }
 
 type Object struct {

@@ -11,11 +11,6 @@ import (
 	"time"
 )
 
-type Provider interface {
-	GetBucket(name string) (Bucket, error)
-	DeleteBucket(name string) error
-}
-
 func AmazonS3(c Credentials) Provider {
 	// Define the parameters for the session you want to create.
 	s3Config := &aws.Config{
@@ -29,17 +24,19 @@ func AmazonS3(c Credentials) Provider {
 	if err != nil {
 		panic(err)
 	}
-	return amazonS3{client: s3.New(svc)}
+	return amazonS3{client: s3.New(svc), defaultACL: "private"}
 }
 
 type amazonS3 struct {
-	client *s3.S3
+	client     *s3.S3
+	defaultACL string
 }
 
 func (a amazonS3) GetBucket(name string) (Bucket, error) {
 	b := &bucket{
-		name:   name,
-		client: a.client,
+		name:       name,
+		client:     a.client,
+		defaultACL: a.defaultACL,
 	}
 	// create the Bucket
 	if err := b.createBucket(); err != nil {
@@ -63,8 +60,9 @@ func (a amazonS3) DeleteBucket(name string) error {
 // Bucket
 
 type bucket struct {
-	name   string
-	client *s3.S3
+	name       string
+	defaultACL string
+	client     *s3.S3
 }
 
 func (b bucket) Name() string {
@@ -178,4 +176,8 @@ func (b bucket) DownloadURL(key string) (string, error) {
 		Key:    aws.String(key),
 	})
 	return req.Presign(5 * time.Minute)
+}
+
+func (b bucket) DefaultACL() string {
+	return b.defaultACL
 }
